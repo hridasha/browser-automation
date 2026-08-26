@@ -1,0 +1,33 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets
+.env
+.env.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test / tool artifacts
+.pytest_cache/
+.ruff_cache/
+screenshot.png
+screenshots/
+
+# Run history (SQLite)
+*.db
+*.db-journal
+
+# Personal / internal docs
+workflow_documentation.docx

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signal Deck — Browser Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">⟢</span>
+      <span class="brand-name">Signal&nbsp;Deck</span>
+      <span class="brand-sub">autonomous web agent</span>
+    </div>
+    <div class="topbar-right">
+      <div class="link-status" id="serverStatus" data-state="connecting">
+        <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="link-label" id="linkLabel">Connecting…</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+    </div>
+  </header>
+
+  <section class="rail" aria-label="Pipeline progress">
+    <ol class="rail-track" id="railTrack">
+      <li class="rail-node" data-node="planner">
+        <span class="rail-dot"></span>
+        <span class="rail-label">Plan</span>
+        <span class="rail-meta" id="railMeta-planner"></span>
+      </li>
+      <li class="rail-connector" data-connector="planner-search"></li>
+      <li class="rail-node" data-node="search">
+        <span class="rail-dot"></span>
+        <span class="rail-label">Search</span>
+        <span class="rail-meta" id="railMeta-search"></span>
+      </li>
+      <li class="rail-connector" data-connector="search-browser"></li>
+      <li class="rail-node" data-node="browser">
+        <span class="rail-dot"></span>
+        <span class="rail-label">Browse</span>
+        <span class="rail-meta" id="railMeta-browser"></span>
+      </li>
+      <li class="rail-connector" data-connector="browser-extraction"></li>
+      <li class="rail-node" data-node="extraction">
+        <span class="rail-dot"></span>
+        <span class="rail-label">Extract</span>
+        <span class="rail-meta" id="railMeta-extraction"></span>
+      </li>
+      <li class="rail-connector" data-connector="extraction-validator"></li>
+      <li class="rail-node" data-node="validator">
+        <span class="rail-dot"></span>
+        <span class="rail-label">Validate</span>
+        <span class="rail-meta" id="railMeta-validator"></span>
+      </li>
+    </ol>
+    <div class="rail-status" id="railStatus">idle — waiting for a goal</div>
+    <div class="attempts-list" id="attemptsList"></div>
+  </section>
+
+  <main class="layout">
+
+    <!-- CONSOLE COLUMN -->
+    <div class="col-console">
+
+      <div class="panel panel-input">
+        <label class="panel-label" for="goalInput">What should the agent look for?</label>
+        <div class="prompt-row">
+          <span class="prompt-caret" aria-hidden="true">›</span>
+          <input
+            type="text"
+            id="goalInput"
+            placeholder="Find remote AI internships posted this week"
+            autocomplete="off"
+          />
+        </div>
+        <div class="panel-foot">
+          <span class="hint">Routes itself to a search, a page visit, or a full run</span>
+          <button id="runBtn" class="btn-run" onclick="runAuto()">Run <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+
+      <div class="panel panel-clarify" id="clarifyPanel" hidden>
+        <div class="panel-label">One more detail before the agent continues</div>
+        <p class="clarify-question" id="clarifyQuestion"></p>
+        <div class="prompt-row">
+          <span class="prompt-caret" aria-hidden="true">›</span>
+          <input type="text" id="clarifyInput" placeholder="Type your answer" autocomplete="off" />
+        </div>
+        <button class="btn-run" onclick="answerClarify()">Send answer <span aria-hidden="true">→</span></button>
+      </div>
+
+      <div class="panel panel-log">
+        <div class="panel-label">Activity log</div>
+        <div id="logBox" class="log"></div>
+      </div>
+
+      <div class="panel panel-history">
+        <div class="panel-head">
+          <span class="panel-label">Run history</span>
+        </div>
+        <button class="history-refresh" onclick="loadRunHistory()">Refresh</button>
+        <div id="historyList" class="history-list">
+          <p class="empty">No runs yet.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESULTS COLUMN -->
+    <div class="col-results">
+
+      <div class="panel panel-results">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <span class="panel-label">Results</span>
+            <span class="tool-tag" id="toolTag" hidden></span>
+          </div>
+          <div class="export-group" id="exportButtons" hidden>
+            <button onclick="exportResults('json')">.json</button>
+            <button onclick="exportResults('csv')">.csv</button>
+          </div>
+        </div>
+        <div id="resultsBox" class="results-body">
+          <p class="empty">Nothing gathered yet — send the agent a goal to start.</p>
+        </div>
+      </div>
+
+      <div class="panel panel-raw" id="toolOutputCard" hidden>
+        <div class="panel-label">Raw page output</div>
+        <pre id="toolOutput"></pre>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
