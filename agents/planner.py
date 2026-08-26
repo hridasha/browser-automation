@@ -9,8 +9,6 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-llm = get_llm()
-
 PLANNER_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """You are an autonomous planning agent.
 Given a user goal, first decide whether it is specific enough to act on.
@@ -42,7 +40,7 @@ def planner_node(state: AgentState) -> AgentState:
     logger.info("Goal received: '%s'", state["user_goal"])
     logger.debug("Calling LLM to generate execution plan...")
 
-    chain = PLANNER_PROMPT | llm
+    chain = PLANNER_PROMPT | get_llm()
     response = invoke_llm(chain, {"goal": state["user_goal"]})
     logger.debug("Raw LLM response: %s", response.content.strip())
 

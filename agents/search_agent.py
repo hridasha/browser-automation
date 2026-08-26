@@ -10,8 +10,6 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-llm = get_llm()
-
 RETRY_QUERY_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """You are a search query optimizer.
 The previous search query did not return useful results.
@@ -31,7 +29,7 @@ def search_node(state: AgentState) -> AgentState:
 
     if failed_attempts > 0:
         logger.info("Retry #%d — asking LLM for a better query...", failed_attempts)
-        chain = RETRY_QUERY_PROMPT | llm
+        chain = RETRY_QUERY_PROMPT | get_llm()
         response = invoke_llm(chain, {
             "goal": state["user_goal"],
             "query": base_query,

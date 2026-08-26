@@ -2,7 +2,7 @@ import asyncio
 
 from playwright.async_api import async_playwright
 
-from tools.browser_tools import extract_links
+from tools.browser_tools import extract_links, _collapse_duplicate_lines
 
 
 def test_extract_links_filters_to_same_domain_and_dedupes():
@@ -34,3 +34,27 @@ def test_extract_links_filters_to_same_domain_and_dedupes():
         "https://example.com/jobs/2",
         "https://www.example.com/jobs/3",
     }
+
+
+def test_collapse_duplicate_lines_removes_immediate_repeat():
+    text = (
+        "Machine Learning Intern\n"
+        "Machine Learning Intern\n"
+        "Acme Corp\n"
+        "Remote\n"
+    )
+    assert _collapse_duplicate_lines(text) == (
+        "Machine Learning Intern\n"
+        "Acme Corp\n"
+        "Remote\n"
+    )
+
+
+def test_collapse_duplicate_lines_leaves_non_adjacent_repeats():
+    text = "Acme Corp\nRemote\nAcme Corp\n"
+    assert _collapse_duplicate_lines(text) == text
+
+
+def test_collapse_duplicate_lines_leaves_blank_lines_untouched():
+    text = "Title\n\n\nCompany\n"
+    assert _collapse_duplicate_lines(text) == text

@@ -10,14 +10,12 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-llm = get_llm()
-
 # Different models/runs drift from the exact field names the prompt asks for despite
 # being told not to (seen in practice: "position_title" instead of "role", "link" instead
 # of "apply_url"). Normalize the common variants so downstream code and the UI, which key
 # off canonical names, still find the data.
 FIELD_ALIASES = {
-    "role": ("job_title", "job title", "title", "position", "position_title", "job_role", "job_name"),
+    "role": ("job_title", "job title", "title", "position", "position_title", "job_role", "job_name", "internship_title", "internship title"),
     "company": ("company_name", "employer", "organization", "org"),
     "apply_url": ("link", "url", "apply_link", "application_link", "job_url", "job_link", "listing_url", "application_url"),
     "salary": ("compensation", "pay", "salary_range", "pay_range"),
@@ -96,7 +94,7 @@ def extraction_node(state: AgentState) -> AgentState:
         logger.debug("[%d/%d] Processing: %s (%d chars, sending first 4000)", i, len(pages), url, content_len)
 
         try:
-            chain = EXTRACTION_PROMPT | llm
+            chain = EXTRACTION_PROMPT | get_llm()
             response = invoke_llm(chain, {
                 "fields": ", ".join(fields),
                 "url": url,

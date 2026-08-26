@@ -34,6 +34,20 @@ def test_normalizes_field_name_variants_from_model_drift():
     assert "link" not in job
 
 
+def test_normalizes_internship_title_key_from_model_drift_on_listing_pages():
+    # Observed in practice on internship-listing pages (e.g. LinkedIn search results): the
+    # model calls the title field "internship_title" instead of "role" when the goal itself
+    # says "internships". Must still canonicalize to "role", or every one of these records
+    # looks role-less to the validator even though the title was extracted correctly.
+    raw_item = {"company": "ByteDance", "internship_title": "Machine Learning Engineer Intern"}
+    with patch("agents.extraction_agent.invoke_llm", return_value=_fake_response(raw_item)):
+        result = extraction_node(_base_state())
+
+    job = result["extracted_jobs"][0]
+    assert job["role"] == "Machine Learning Engineer Intern"
+    assert "internship_title" not in job
+
+
 def test_normalizes_title_case_field_names_from_planner_chosen_labels():
     # The planner is free to phrase extraction_fields however it wants (e.g. "Job Title",
     # "Company", "Application Link" instead of role/company/apply_url), and the model

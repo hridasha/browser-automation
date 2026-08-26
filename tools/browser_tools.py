@@ -41,6 +41,23 @@ async def extract_links(page: Page, base_url: str) -> list[str]:
     return links
 
 
+def _collapse_duplicate_lines(text: str) -> str:
+    """Collapse a line that immediately repeats the line before it. Many sites (LinkedIn's
+    job cards, for one) render a visible heading plus a visually-hidden duplicate of the same
+    text for screen readers, and innerText captures both back-to-back. Left in, this clutter
+    roughly doubles the length of every listing entry and makes it harder for the extraction
+    LLM to correctly pair each title with its company/location across a long list."""
+    collapsed = []
+    prev_stripped = None
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if stripped and stripped == prev_stripped:
+            continue
+        collapsed.append(line)
+        prev_stripped = stripped
+    return "\n".join(collapsed)
+
+
 async def _extract_from_page(
     browser: Browser, url: str, timeout: int, collect_links: bool = False, screenshot_path: Optional[str] = None
 ) -> tuple[Optional[str], list[str]]:
@@ -48,6 +65,7 @@ async def _extract_from_page(
     try:
         await page.goto(url, timeout=timeout, wait_until="domcontentloaded")
         content = await page.evaluate("() => document.body.innerText")
+        content = _collapse_duplicate_lines(content)
         links = await extract_links(page, url) if collect_links else []
         if screenshot_path:
             try:
